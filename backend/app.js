@@ -105,19 +105,19 @@ app.post('/forgot-password', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'kris111kri@gmail.com',
-                pass: 'zuqu gtlr udst pcab' // Add your Gmail password here
+                user: process.env.email,
+                pass: process.env.password// Add your Gmail password here
             }
         });
 
         const mailOptions = {
-            from: 'kris111kri@gmail.com',
+            from: process.env.email,
             to: email,
             subject: 'Reset Password Link',
             text: `http://localhost:3000/reset_password/${user._id}/${token}`
         };
 
-        const info = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
 
         console.log(email);
         return res.send({ Status: "Success" });
@@ -428,14 +428,14 @@ app.post('/deletetask', async (req, res) => {
     const userfilter = { tasktitle: title, taskuser: user };
 
     UserTaskModel.findOneAndDelete(userfilter
-        ).then(
-            newTask => {
-                console.log("Task deleted successfully from UserTask");
-                // res.json(newTask);
-            }).catch(err => {
-                console.error(err);
-                res.status(500).json({ error: err.message });
-            });
+    ).then(
+        newTask => {
+            console.log("Task deleted successfully from UserTask");
+            // res.json(newTask);
+        }).catch(err => {
+            console.error(err);
+            res.status(500).json({ error: err.message });
+        });
 
     TaskModel.findOneAndDelete(filter
     ).then(
@@ -475,31 +475,53 @@ app.post('/completetask', async (req, res) => {
         });
 });
 
+// app.post('/gettasks', async (req, res) => {
+//     const { username } = req.body;
+//     // console.log("Email received: " + username);
+//     try {
+//         EmployeeInfoModel.findOne({ email: username }, 'fName').then(
+//             getname => {
+//                 console.log("Name found successfully: " + getname.fName);
+//                 UserTaskModel.find({ taskuser: getname.fName }, 'tasktitle description').then(
+//                     newData => {
+//                         // console.log("Data found successfully: " + newData);
+//                         res.json(newData);
+//                     }
+//                 ).catch(err => {
+//                     console.error(err);
+//                     res.status(500).json({ error: err.message });
+//                 });
+//             }
+
+//         )
+//         // res.json({ success: true, message: 'User deleted and added to other collection' });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ success: false, error: 'Error moving user to other collection', detailedError: err });
+//     }
+// });
+
 app.post('/gettasks', async (req, res) => {
     const { username } = req.body;
-    // console.log("Email received: " + username);
     try {
-        EmployeeInfoModel.findOne({ email: username }, 'fName').then(
-            getname => {
-                // console.log("Name found successfully: " + getname.fName);
-                UserTaskModel.find({ taskuser: getname.fName }, 'tasktitle description').then(
-                    newData => {
-                        // console.log("Data found successfully: " + newData);
-                        res.json(newData);
-                    }
-                ).catch(err => {
-                    console.error(err);
-                    res.status(500).json({ error: err.message });
-                });
-            }
+        const getname = await EmployeeInfoModel.findOne({ email: username }, 'fName');
 
-        )
-        // res.json({ success: true, message: 'User deleted and added to other collection' });
+        if (!getname) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        console.log("Name found successfully: " + getname.fName);
+
+        const newData = await UserTaskModel.find({ taskuser: getname.fName }, 'tasktitle description');
+
+        res.json(newData);
+
     } catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, error: 'Error moving user to other collection', detailedError: err });
+        res.status(500).json({ success: false, error: 'Error retrieving tasks', detailedError: err.message });
     }
 });
+
 
 app.get('/getalltasks', async (req, res) => {
     TaskModel.find({}, 'tasktitle taskuser description iscompleted').then(
@@ -597,13 +619,13 @@ app.post('/checkRequest', async (req, res) => {
         newData => {
             // console.log("Data found successfully: " + newData);
             if (newData.status === 'Approved') {
-                res.json('Your Leave Request has been Approved !!');
+                return res.json('Your Leave Request has been Approved !!');
             }
-            res.json('Your Leave Request is Pending !!');
+            return res.json('Your Leave Request is Pending !!');
         }
     ).catch(err => {
         console.error(err.message);
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     });
 });
 

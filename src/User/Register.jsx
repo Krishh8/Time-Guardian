@@ -9,8 +9,6 @@ import Lottie from 'lottie-react';
 import registerAnimation from '../Animation/animation_register.json';
 import logo from '../TIMEBG.png';
 
-
-
 const Register = () => {
     const [formValues, setFormValues] = useState({ username: "", email: "", password: "", mono: "" });
     const [formErrors, setFormErrors] = useState({});

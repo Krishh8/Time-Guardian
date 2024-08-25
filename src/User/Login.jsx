@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import loginStyle from './Login.module.css';
 import { Form } from 'react-bootstrap';
@@ -140,7 +140,7 @@ const Login = ({ onLogin }) => {
 
                         <div className={`col-lg-4 col-md-10 mx-auto`}>
                             <div className={loginStyle.frm}>
-                            <div className='text-end'>
+                                <div className='text-end'>
                                     <img src={logo} alt='' className='text-end' width='auto' height='150px' />
                                 </div>
                                 <form onSubmit={handleSubmit}>
